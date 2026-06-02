@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChangeEvent, FormEvent } from "react";
+import type { ChangeEvent, DragEvent, FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Button, Card, Input, Price, Select, Textarea, Badge } from "@mattress/ui";
@@ -56,7 +56,7 @@ export function AdminProductsPage() {
   const [form, setForm] = useState<ProductFormState>(initialFormState);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [uploadingField, setUploadingField] = useState<"gallery" | "main" | null>(null);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -239,42 +239,66 @@ export function AdminProductsPage() {
     }
   }
 
-  async function handleImageUpload(
-    event: ChangeEvent<HTMLInputElement>,
-    target: "gallery" | "main"
-  ) {
-    const file = event.target.files?.[0];
-    event.target.value = "";
+  function getImageUrls() {
+    return [form.mainImageUrl, ...form.galleryImageUrls.split(/\r?\n/)]
+      .map((url) => url.trim())
+      .filter(Boolean);
+  }
 
-    if (!file) {
+  function updateImageUrls(urls: string[]) {
+    const uniqueUrls = Array.from(new Set(urls.map((url) => url.trim()).filter(Boolean)));
+    const [mainImageUrl = "", ...galleryUrls] = uniqueUrls;
+
+    setForm((current) => ({
+      ...current,
+      galleryImageUrls: galleryUrls.join("\n"),
+      mainImageUrl
+    }));
+  }
+
+  async function uploadImageFiles(files: FileList | File[]) {
+    const selectedFiles = Array.from(files);
+
+    if (selectedFiles.length === 0) {
       return;
     }
 
     setError(null);
-    setUploadingField(target);
+    setIsUploadingImages(true);
 
     try {
-      const uploadedImage = await uploadAdminImage(file);
-
-      if (target === "main") {
-        setForm((current) => ({
-          ...current,
-          mainImageUrl: uploadedImage.url
-        }));
-      } else {
-        setForm((current) => ({
-          ...current,
-          galleryImageUrls: [current.galleryImageUrls.trim(), uploadedImage.url]
-            .filter(Boolean)
-            .join("\n")
-        }));
-      }
+      const uploadedImages = await Promise.all(selectedFiles.map(uploadAdminImage));
+      updateImageUrls([...getImageUrls(), ...uploadedImages.map((image) => image.url)]);
     } catch {
-      setError("Не удалось загрузить изображение.");
+      setError("Не удалось загрузить изображения.");
     } finally {
-      setUploadingField(null);
+      setIsUploadingImages(false);
     }
   }
+
+  function handleImageInputChange(event: ChangeEvent<HTMLInputElement>) {
+    const { files } = event.target;
+    event.target.value = "";
+
+    if (files) {
+      void uploadImageFiles(files);
+    }
+  }
+
+  function handleImageDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    void uploadImageFiles(event.dataTransfer.files);
+  }
+
+  function removeImage(url: string) {
+    updateImageUrls(getImageUrls().filter((imageUrl) => imageUrl !== url));
+  }
+
+  function makeMainImage(url: string) {
+    updateImageUrls([url, ...getImageUrls().filter((imageUrl) => imageUrl !== url)]);
+  }
+
+  const imageUrls = getImageUrls();
 
   return (
     <div className="page-stack admin-products-page">
@@ -393,54 +417,65 @@ export function AdminProductsPage() {
                 <option value="ARCHIVED">{productStatusLabels.ARCHIVED}</option>
               </Select>
             </label>
-            <label>
-              <span>Основное фото</span>
-              <Input
-                fullWidth
-                placeholder="https://..."
-                onChange={(event) => setForm({ ...form, mainImageUrl: event.target.value })}
-                value={form.mainImageUrl}
-              />
-            </label>
-            <label>
-              <span>Загрузить основное фото</span>
-              <Input
-                accept="image/jpeg,image/png,image/webp,image/svg+xml"
-                disabled={Boolean(uploadingField)}
-                fullWidth
-                onChange={(event) => void handleImageUpload(event, "main")}
-                type="file"
-              />
-              {uploadingField === "main" ? (
-                <span className="admin-products-form__hint">Загрузка фото</span>
-              ) : null}
-            </label>
-            {form.mainImageUrl ? (
-              <div className="admin-products-form__preview">
-                <img alt="Основное фото товара" src={form.mainImageUrl} />
+            <div className="admin-products-images">
+              <div>
+                <span className="admin-products-images__label">Фотографии товара</span>
+                <span className="admin-products-form__hint">
+                  Первая фотография будет основной в карточке товара.
+                </span>
               </div>
-            ) : null}
-            <label>
-              <span>Галерея, по одному URL в строке</span>
-              <Textarea
-                fullWidth
-                onChange={(event) => setForm({ ...form, galleryImageUrls: event.target.value })}
-                value={form.galleryImageUrls}
-              />
-            </label>
-            <label>
-              <span>Добавить фото в галерею</span>
-              <Input
-                accept="image/jpeg,image/png,image/webp,image/svg+xml"
-                disabled={Boolean(uploadingField)}
-                fullWidth
-                onChange={(event) => void handleImageUpload(event, "gallery")}
-                type="file"
-              />
-              {uploadingField === "gallery" ? (
-                <span className="admin-products-form__hint">Загрузка фото</span>
+              <div
+                className="admin-products-images__dropzone"
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={handleImageDrop}
+              >
+                <Input
+                  accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                  className="admin-products-images__input"
+                  disabled={isUploadingImages}
+                  id="admin-product-images"
+                  multiple
+                  onChange={handleImageInputChange}
+                  type="file"
+                />
+                <label className="admin-products-images__picker" htmlFor="admin-product-images">
+                  {isUploadingImages ? "Загружаем фотографии" : "Выбрать фотографии"}
+                </label>
+                <span className="admin-products-images__drop-text">
+                  или перетащите файлы сюда
+                </span>
+              </div>
+              {imageUrls.length > 0 ? (
+                <div className="admin-products-images__grid">
+                  {imageUrls.map((url, index) => (
+                    <div className="admin-products-images__item" key={url}>
+                      <img alt={`Фото товара ${index + 1}`} src={url} />
+                      <div className="admin-products-images__item-actions">
+                        <Badge>{index === 0 ? "Основное" : "Галерея"}</Badge>
+                        {index > 0 ? (
+                          <Button
+                            onClick={() => makeMainImage(url)}
+                            size="sm"
+                            type="button"
+                            variant="secondary"
+                          >
+                            Сделать основным
+                          </Button>
+                        ) : null}
+                        <Button
+                          onClick={() => removeImage(url)}
+                          size="sm"
+                          type="button"
+                          variant="ghost"
+                        >
+                          Удалить
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : null}
-            </label>
+            </div>
             <label>
               <span>Описание</span>
               <Textarea
