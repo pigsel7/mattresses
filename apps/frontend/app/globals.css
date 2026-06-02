@@ -1290,6 +1290,7 @@ a {
   left: 0;
   display: grid;
   width: max(100%, 220px);
+  max-width: calc(100vw - 32px);
   max-height: 280px;
   overflow-y: auto;
   border: 1px solid #d8d8d8;
@@ -1796,6 +1797,13 @@ a {
 
   .catalog-controls .ui-select-control {
     min-width: 150px;
+  }
+
+  .ui-select-control__list {
+    right: 0;
+    left: auto;
+    width: min(220px, calc(100vw - 32px));
+    min-width: 100%;
   }
 
   .product-details {
