@@ -49,9 +49,16 @@ a {
 .site-header__top,
 .site-header__main {
   display: flex;
-  align-items: center;
   justify-content: space-between;
   gap: 24px;
+}
+
+.site-header__top {
+  align-items: flex-start;
+}
+
+.site-header__main {
+  align-items: center;
 }
 
 .site-header__brand {
@@ -81,6 +88,7 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  margin-top: 1px;
   min-height: 34px;
   border: 1px solid #b8e7f6;
   border-radius: 8px;
@@ -292,12 +300,15 @@ a {
 .category-strip {
   display: flex;
   gap: 10px;
-  width: 100%;
-  max-width: 100%;
+  width: 100vw;
   min-width: 0;
+  margin-right: calc(50% - 50vw);
+  margin-left: calc(50% - 50vw);
   overflow-x: auto;
   overscroll-behavior-x: contain;
+  padding-right: max(16px, calc((100vw - 1180px) / 2));
   padding-bottom: 4px;
+  padding-left: max(16px, calc((100vw - 1180px) / 2));
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
