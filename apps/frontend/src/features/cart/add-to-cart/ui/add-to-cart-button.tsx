@@ -18,7 +18,7 @@ export function AddToCartButton({ productId }: AddToCartButtonProps) {
       size="sm"
       variant={isInCart ? "secondary" : "primary"}
     >
-      {isInCart ? "Еще в корзину" : "В корзину"}
+      {isInCart ? "В корзине" : "В корзину"}
     </Button>
   );
 }

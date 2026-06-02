@@ -1458,9 +1458,17 @@ a {
   grid-column: 1 / -1;
 }
 
-.cart-item__controls .ui-input {
-  width: 68px;
+.cart-item__quantity {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
   padding: 0 8px;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
   text-align: center;
 }
 

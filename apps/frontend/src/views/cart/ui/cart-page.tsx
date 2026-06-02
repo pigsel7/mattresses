@@ -190,6 +190,7 @@ export function CartPage() {
               <div className="cart-item__controls">
                 <Button
                   aria-label={`Уменьшить количество ${line.product.title}`}
+                  disabled={line.quantity <= 1}
                   onClick={() => updateItem(line.productId, line.quantity - 1)}
                   size="sm"
                   type="button"
@@ -197,15 +198,12 @@ export function CartPage() {
                 >
                   −
                 </Button>
-                <Input
+                <span
                   aria-label={`Количество ${line.product.title}`}
-                  min={1}
-                  onChange={(event) =>
-                    updateItem(line.productId, Number(event.target.value))
-                  }
-                  type="number"
-                  value={line.quantity}
-                />
+                  className="cart-item__quantity"
+                >
+                  {line.quantity}
+                </span>
                 <Button
                   aria-label={`Увеличить количество ${line.product.title}`}
                   onClick={() => updateItem(line.productId, line.quantity + 1)}
