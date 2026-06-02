@@ -276,7 +276,7 @@ export function AdminProductsPage() {
               <span>Категория</span>
               <Select
                 fullWidth
-                onChange={(event) => setForm({ ...form, categoryId: event.target.value })}
+                onValueChange={(categoryId) => setForm({ ...form, categoryId })}
                 value={form.categoryId}
               >
                 <option value="">Выберите категорию</option>
@@ -332,10 +332,10 @@ export function AdminProductsPage() {
               <span>Статус</span>
               <Select
                 fullWidth
-                onChange={(event) =>
+                onValueChange={(status) =>
                   setForm({
                     ...form,
-                    status: event.target.value as ProductFormState["status"]
+                    status: status as ProductFormState["status"]
                   })
                 }
                 value={form.status}

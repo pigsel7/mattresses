@@ -99,8 +99,8 @@ export function AdminOrdersPage() {
 
       <div className="admin-orders-page__toolbar">
         <Select
-          onChange={(event) =>
-            setStatusFilter(event.target.value as AdminOrderStatusDto | "")
+          onValueChange={(status) =>
+            setStatusFilter(status as AdminOrderStatusDto | "")
           }
           value={statusFilter}
         >
@@ -167,8 +167,8 @@ export function AdminOrdersPage() {
             <div className="admin-order-details__status">
               <Select
                 disabled={savingStatus}
-                onChange={(event) =>
-                  void handleStatusChange(event.target.value as AdminOrderStatusDto)
+                onValueChange={(status) =>
+                  void handleStatusChange(status as AdminOrderStatusDto)
                 }
                 value={selectedOrder.status}
               >

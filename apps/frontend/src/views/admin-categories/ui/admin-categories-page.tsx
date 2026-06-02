@@ -194,7 +194,7 @@ export function AdminCategoriesPage() {
               <span>Родительская категория</span>
               <Select
                 fullWidth
-                onChange={(event) => setForm({ ...form, parentId: event.target.value })}
+                onValueChange={(parentId) => setForm({ ...form, parentId })}
                 value={form.parentId}
               >
                 <option value="">Без родителя</option>
