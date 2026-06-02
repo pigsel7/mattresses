@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc">
+  <title id="title">Classic bed</title>
+  <desc id="desc">A clean product illustration of a bed with a soft headboard.</desc>
+  <rect width="800" height="600" fill="#f7f5f1"/>
+  <rect x="130" y="150" width="168" height="276" rx="20" fill="#9a6a52"/>
+  <rect x="154" y="174" width="120" height="220" rx="14" fill="#b98769"/>
+  <path d="M206 274h430c40 0 72 32 72 72v85H206z" fill="#cfdce2"/>
+  <path d="M206 332h502v105H206z" fill="#7a5949"/>
+  <path d="M252 292h154v52H252zM430 292h154v52H430z" fill="#ffffff"/>
+  <path d="M206 437h502" stroke="#5f4035" stroke-width="10"/>
+  <rect x="238" y="437" width="34" height="74" rx="8" fill="#5f4035"/>
+  <rect x="642" y="437" width="34" height="74" rx="8" fill="#5f4035"/>
+  <path d="M92 511h632" stroke="#dacfc4" stroke-width="8" stroke-linecap="round"/>
+</svg>

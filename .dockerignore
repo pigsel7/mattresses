@@ -1,0 +1,15 @@
+node_modules
+**/node_modules
+.next
+**/.next
+dist
+**/dist
+coverage
+.git
+.env
+**/.env
+**/.env.local
+**/tsconfig.tsbuildinfo
+pnpm-debug.log*
+Dockerfile
+docker-compose.yml

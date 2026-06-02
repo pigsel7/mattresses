@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 240" role="img" aria-labelledby="title desc">
+  <title id="title">Кровати</title>
+  <desc id="desc">Иллюстрация категории кроватей.</desc>
+  <rect width="420" height="240" rx="28" fill="#f8f1ea"/>
+  <rect x="54" y="58" width="86" height="132" rx="14" fill="#9d6d55"/>
+  <rect x="72" y="76" width="50" height="96" rx="10" fill="#bc8a6b"/>
+  <path d="M102 122h216c28 0 50 22 50 50v28H102z" fill="#d7e3e8"/>
+  <path d="M102 154h266v50H102z" fill="#7a5949"/>
+  <rect x="126" y="134" width="82" height="28" rx="6" fill="#ffffff"/>
+  <rect x="222" y="134" width="82" height="28" rx="6" fill="#ffffff"/>
+  <path d="M102 204h266" stroke="#5f4035" stroke-width="7" stroke-linecap="round"/>
+  <rect x="126" y="204" width="18" height="26" rx="5" fill="#5f4035"/>
+  <rect x="326" y="204" width="18" height="26" rx="5" fill="#5f4035"/>
+  <path d="M40 230h340" stroke="#dfd0c2" stroke-width="6" stroke-linecap="round"/>
+</svg>

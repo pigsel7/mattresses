@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title desc">
+  <title id="title">Relax pillow</title>
+  <desc id="desc">A clean product illustration of a pillow on a calm bedroom background.</desc>
+  <rect width="800" height="600" fill="#f1f8f6"/>
+  <path d="M162 270c12-69 77-112 152-91 58 16 113 16 171 0 75-21 140 22 152 91 12 71-37 132-112 137-83 6-167 6-250 0-75-5-125-66-113-137z" fill="#ffffff"/>
+  <path d="M201 271c9-39 49-61 93-48 71 20 142 20 213 0 44-13 84 9 93 48 10 45-22 82-70 86-86 7-173 7-259 0-48-4-80-41-70-86z" fill="#dcefed"/>
+  <path d="M162 270c12-69 77-112 152-91 58 16 113 16 171 0 75-21 140 22 152 91 12 71-37 132-112 137-83 6-167 6-250 0-75-5-125-66-113-137z" fill="none" stroke="#8db8b2" stroke-width="8"/>
+  <path d="M251 312c100 20 198 20 296 0" fill="none" stroke="#b9d6d2" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="632" cy="167" r="42" fill="#ffcf70"/>
+  <path d="M116 453h568" stroke="#cfe0dd" stroke-width="8" stroke-linecap="round"/>
+</svg>

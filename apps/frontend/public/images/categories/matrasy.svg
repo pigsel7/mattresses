@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 240" role="img" aria-labelledby="title desc">
+  <title id="title">Матрасы</title>
+  <desc id="desc">Иллюстрация категории матрасов.</desc>
+  <rect width="420" height="240" rx="28" fill="#eaf7fb"/>
+  <circle cx="348" cy="54" r="26" fill="#ffd166"/>
+  <path d="M54 128 229 62l130 56-179 74z" fill="#ffffff"/>
+  <path d="M54 128v42l126 66v-44z" fill="#d9eaf0"/>
+  <path d="M180 192v44l179-76v-42z" fill="#bdd6df"/>
+  <path d="M54 128 229 62l130 56-179 74z" fill="none" stroke="#77a9b7" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M92 124c38 18 76 18 114 0M152 101c32 14 62 14 93 0" fill="none" stroke="#d4e9ef" stroke-width="7" stroke-linecap="round"/>
+  <path d="M80 168 180 219l179-75" fill="none" stroke="#9ec2cd" stroke-width="4" stroke-linecap="round"/>
+</svg>

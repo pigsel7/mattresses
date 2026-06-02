@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mattress-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mattress}
+      POSTGRES_USER: ${POSTGRES_USER:-mattress}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mattress}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mattress} -d ${POSTGRES_DB:-mattress}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: mattress-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-mattress}:${POSTGRES_PASSWORD:-mattress}@postgres:5432/${POSTGRES_DB:-mattress}?schema=public
+      CORS_ORIGIN: http://localhost:${FRONTEND_PORT:-3000}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-local-env}
+      SHOP_CONTACT_PHONE: "${SHOP_CONTACT_PHONE:-+7 000 000-00-00}"
+      SHOP_ADDRESS: "${SHOP_ADDRESS:-г. Симферополь}"
+      SHOP_OWNER_EMAIL: ${SHOP_OWNER_EMAIL:-owner@example.com}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: "${SMTP_FROM:-Sleep Shop <no-reply@example.com>}"
+      PORT: 4000
+    ports:
+      - "${BACKEND_PORT:-4000}:4000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-4000}
+    container_name: mattress-frontend
+    depends_on:
+      - backend
+    environment:
+      API_URL: http://backend:4000
+      NEXT_PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-4000}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+
+volumes:
+  postgres-data:

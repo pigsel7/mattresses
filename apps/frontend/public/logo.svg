@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Sleep Shop</title>
+  <desc id="desc">Цветной знак магазина товаров для сна.</desc>
+  <rect width="96" height="96" rx="24" fill="#00aaff"/>
+  <circle cx="72" cy="24" r="12" fill="#ffd166"/>
+  <path d="M20 54h50c9 0 16 7 16 16v8H20z" fill="#ffffff"/>
+  <path d="M18 40h18c7 0 12 5 12 12v26H18z" fill="#ff7a59"/>
+  <path d="M48 52h16c8 0 14 6 14 14v12H48z" fill="#dff5fb"/>
+  <path d="M20 78h66" stroke="#006f9f" stroke-width="6" stroke-linecap="round"/>
+  <path d="M32 78v8M76 78v8" stroke="#006f9f" stroke-width="6" stroke-linecap="round"/>
+</svg>

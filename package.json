@@ -1,0 +1,32 @@
+{
+  "name": "mattress",
+  "version": "1.0.0",
+  "description": "Monorepo for a sleep products ecommerce app.",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=18.20.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @mattress/frontend --filter @mattress/backend dev",
+    "dev:frontend": "pnpm --filter @mattress/frontend dev",
+    "dev:backend": "pnpm --filter @mattress/backend start:dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "format": "prettier --write .",
+    "db:generate": "pnpm --filter @mattress/backend db:generate",
+    "db:migrate": "pnpm --filter @mattress/backend db:migrate",
+    "db:seed": "pnpm --filter @mattress/backend db:seed",
+    "test": "pnpm -r test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.15.0"
+  }
+}
