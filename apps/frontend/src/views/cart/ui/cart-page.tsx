@@ -156,8 +156,13 @@ export function CartPage() {
     <section className="cart-page">
       <h1 className="section-title">Корзина</h1>
       {createdOrderNumber ? (
-        <div className="empty-state">
-          Заказ {createdOrderNumber} создан. Мы свяжемся с вами для подтверждения.
+        <div className="empty-state cart-page__success">
+          <strong>Заказ {createdOrderNumber} создан.</strong>
+          <span>
+            Мы отправили письмо владельцу магазина с составом заказа и вашими
+            контактами. С вами свяжутся по указанному телефону, чтобы подтвердить
+            заказ и доставку.
+          </span>
         </div>
       ) : null}
       {loadError ? (
@@ -171,65 +176,15 @@ export function CartPage() {
         </div>
       ) : null}
       <div className="cart-page__layout">
-        <div className="cart-page__items">
-          {isLoading ? <div className="empty-state">Загрузка корзины.</div> : null}
-          {lines.map((line) => (
-            <Card className="cart-item" key={line.productId}>
-              <div className="cart-item__media">
-                {line.product.imageUrl ? (
-                  <img alt={line.product.title} src={line.product.imageUrl} />
-                ) : null}
-              </div>
-              <div className="cart-item__body">
-                <h2 className="cart-item__title">{line.product.title}</h2>
-                {line.product.shortDescription ? (
-                  <p className="cart-item__meta">{line.product.shortDescription}</p>
-                ) : null}
-                <Price amount={line.product.price} currency={line.product.currency} />
-              </div>
-              <div className="cart-item__controls">
-                <Button
-                  aria-label={`Уменьшить количество ${line.product.title}`}
-                  disabled={line.quantity <= 1}
-                  onClick={() => updateItem(line.productId, line.quantity - 1)}
-                  size="sm"
-                  type="button"
-                  variant="ghost"
-                >
-                  −
-                </Button>
-                <span
-                  aria-label={`Количество ${line.product.title}`}
-                  className="cart-item__quantity"
-                >
-                  {line.quantity}
-                </span>
-                <Button
-                  aria-label={`Увеличить количество ${line.product.title}`}
-                  onClick={() => updateItem(line.productId, line.quantity + 1)}
-                  size="sm"
-                  type="button"
-                  variant="ghost"
-                >
-                  +
-                </Button>
-                <Button
-                  onClick={() => removeItem(line.productId)}
-                  size="sm"
-                  type="button"
-                  variant="secondary"
-                >
-                  Удалить
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
         <Card className="checkout-card">
           <div className="checkout-card__total">
             <span>Итого</span>
             <Price amount={total} />
           </div>
+          <p className="checkout-card__note">
+            После оформления письмо с заказом придет владельцу магазина. Он
+            перезвонит по указанному телефону, чтобы подтвердить детали.
+          </p>
           <form className="checkout-form" onSubmit={handleSubmit}>
             <label>
               <span>Имя</span>
@@ -293,6 +248,60 @@ export function CartPage() {
             </Button>
           </form>
         </Card>
+        <div className="cart-page__items">
+          {isLoading ? <div className="empty-state">Загрузка корзины.</div> : null}
+          {lines.map((line) => (
+            <Card className="cart-item" key={line.productId}>
+              <div className="cart-item__media">
+                {line.product.imageUrl ? (
+                  <img alt={line.product.title} src={line.product.imageUrl} />
+                ) : null}
+              </div>
+              <div className="cart-item__body">
+                <h2 className="cart-item__title">{line.product.title}</h2>
+                {line.product.shortDescription ? (
+                  <p className="cart-item__meta">{line.product.shortDescription}</p>
+                ) : null}
+                <Price amount={line.product.price} currency={line.product.currency} />
+              </div>
+              <div className="cart-item__controls">
+                <Button
+                  aria-label={`Уменьшить количество ${line.product.title}`}
+                  disabled={line.quantity <= 1}
+                  onClick={() => updateItem(line.productId, line.quantity - 1)}
+                  size="sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  −
+                </Button>
+                <span
+                  aria-label={`Количество ${line.product.title}`}
+                  className="cart-item__quantity"
+                >
+                  {line.quantity}
+                </span>
+                <Button
+                  aria-label={`Увеличить количество ${line.product.title}`}
+                  onClick={() => updateItem(line.productId, line.quantity + 1)}
+                  size="sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  +
+                </Button>
+                <Button
+                  onClick={() => removeItem(line.productId)}
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                >
+                  Удалить
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
       </div>
     </section>
   );

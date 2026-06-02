@@ -7,6 +7,11 @@ type AdminPageProps = {
   admin: AdminSessionDto;
 };
 
+const roleLabels: Record<string, string> = {
+  ADMIN: "Администратор",
+  SUPER_ADMIN: "Главный администратор"
+};
+
 export function AdminPage({ admin }: AdminPageProps) {
   const lastLoginAt = admin.lastLoginAt
     ? new Date(admin.lastLoginAt).toLocaleString("ru-RU")
@@ -31,7 +36,7 @@ export function AdminPage({ admin }: AdminPageProps) {
         <div className="admin-dashboard__summary-row">
           <div>
             <div className="admin-dashboard__label">Статус доступа</div>
-            <Badge>{admin.role}</Badge>
+            <Badge>{roleLabels[admin.role] ?? "Администратор"}</Badge>
           </div>
           <div>
             <div className="admin-dashboard__label">Состояние аккаунта</div>
@@ -40,8 +45,10 @@ export function AdminPage({ admin }: AdminPageProps) {
             </div>
           </div>
           <div>
-            <div className="admin-dashboard__label">Следующий шаг</div>
-            <div className="admin-dashboard__value">Фото товаров и доработка аналитики</div>
+            <div className="admin-dashboard__label">Что можно делать</div>
+            <div className="admin-dashboard__value">
+              Управлять товарами, категориями, заказами и настройками магазина
+            </div>
           </div>
         </div>
       </Card>

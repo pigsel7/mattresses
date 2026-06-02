@@ -156,7 +156,7 @@ export function AdminCategoriesPage() {
         <div>
           <h1 className="section-title">Категории</h1>
           <p className="admin-categories-page__description">
-            Дерево категорий, родительские связи и базовые параметры.
+            Разделы каталога, карточки категорий на главной и вложенность.
           </p>
         </div>
         <div className="admin-categories-page__top-actions">
@@ -183,12 +183,16 @@ export function AdminCategoriesPage() {
               />
             </label>
             <label>
-              <span>Slug</span>
+              <span>Адрес страницы</span>
               <Input
                 fullWidth
                 onChange={(event) => setForm({ ...form, slug: event.target.value })}
+                placeholder="matrasy"
                 value={form.slug}
               />
+              <span className="admin-products-form__hint">
+                Используется в ссылке каталога, например /catalog?category=matrasy.
+              </span>
             </label>
             <label>
               <span>Родительская категория</span>
@@ -257,12 +261,12 @@ export function AdminCategoriesPage() {
                   <div>
                     <h2 className="admin-category-row__title">{category.name}</h2>
                     <div className="admin-category-row__meta">
-                      <span>{category.slug}</span>
+                      <span>{`Ссылка: /catalog?category=${category.slug}`}</span>
                       {category.parent ? <span>Родитель: {category.parent.name}</span> : null}
                     </div>
                   </div>
                   <Badge>
-                    {category.productsCount} / {category.childrenCount}
+                    {category.productsCount} товаров, {category.childrenCount} подкатегорий
                   </Badge>
                 </div>
                 <p className="admin-category-row__description">

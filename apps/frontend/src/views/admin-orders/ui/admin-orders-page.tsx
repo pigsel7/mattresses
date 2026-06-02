@@ -20,6 +20,14 @@ const orderStatuses: Array<{ label: string; value: AdminOrderStatusDto | "" }> =
   { label: "Отмененные", value: "CANCELLED" }
 ];
 
+const orderStatusLabels = Object.fromEntries(
+  orderStatuses
+    .filter((status): status is { label: string; value: AdminOrderStatusDto } =>
+      Boolean(status.value)
+    )
+    .map((status) => [status.value, status.label])
+) as Record<AdminOrderStatusDto, string>;
+
 export function AdminOrdersPage() {
   const [orders, setOrders] = useState<AdminOrderDto[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -133,7 +141,7 @@ export function AdminOrdersPage() {
               >
                 <span className="admin-order-row__top">
                   <span className="admin-order-row__number">{order.orderNumber}</span>
-                  <Badge>{order.status}</Badge>
+                  <Badge>{orderStatusLabels[order.status]}</Badge>
                 </span>
                 <span className="admin-order-row__meta">
                   <span>{order.customerName}</span>
@@ -161,7 +169,7 @@ export function AdminOrdersPage() {
                   {new Date(selectedOrder.createdAt).toLocaleString("ru-RU")}
                 </p>
               </div>
-              <Badge>{selectedOrder.status}</Badge>
+              <Badge>{orderStatusLabels[selectedOrder.status]}</Badge>
             </div>
 
             <div className="admin-order-details__status">
@@ -216,7 +224,11 @@ export function AdminOrdersPage() {
                       {item.productSnapshotName}
                     </div>
                     <div className="admin-order-item__meta">
-                      {item.productSnapshotSku || item.productSnapshotSlug || "без SKU"}
+                      {item.productSnapshotSku
+                        ? `Артикул: ${item.productSnapshotSku}`
+                        : item.productSnapshotSlug
+                          ? `Ссылка: /product/${item.productSnapshotSlug}`
+                          : "Без артикула"}
                     </div>
                   </div>
                   <div className="admin-order-item__sum">

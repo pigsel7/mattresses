@@ -43,6 +43,12 @@ const initialFormState: ProductFormState = {
   title: ""
 };
 
+const productStatusLabels: Record<ProductFormState["status"], string> = {
+  ACTIVE: "Опубликован",
+  ARCHIVED: "Скрыт из каталога",
+  DRAFT: "Черновик"
+};
+
 export function AdminProductsPage() {
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [products, setProducts] = useState<AdminProductDto[]>([]);
@@ -303,13 +309,16 @@ export function AdminProductsPage() {
               />
             </label>
             <label>
-              <span>Slug</span>
+              <span>Адрес страницы</span>
               <Input
                 fullWidth
                 onChange={(event) => setForm({ ...form, slug: event.target.value })}
                 placeholder="matras-ortopedicheskii"
                 value={form.slug}
               />
+              <span className="admin-products-form__hint">
+                Только латиница, цифры и дефисы. Используется в ссылке на товар.
+              </span>
             </label>
             <label>
               <span>Категория</span>
@@ -359,7 +368,7 @@ export function AdminProductsPage() {
                 />
               </label>
               <label>
-                <span>SKU</span>
+                <span>Артикул</span>
                 <Input
                   fullWidth
                   onChange={(event) => setForm({ ...form, sku: event.target.value })}
@@ -368,7 +377,7 @@ export function AdminProductsPage() {
               </label>
             </div>
             <label>
-              <span>Статус</span>
+              <span>Публикация</span>
               <Select
                 fullWidth
                 onValueChange={(status) =>
@@ -379,9 +388,9 @@ export function AdminProductsPage() {
                 }
                 value={form.status}
               >
-                <option value="DRAFT">Черновик</option>
-                <option value="ACTIVE">Активен</option>
-                <option value="ARCHIVED">Архив</option>
+                <option value="DRAFT">{productStatusLabels.DRAFT}</option>
+                <option value="ACTIVE">{productStatusLabels.ACTIVE}</option>
+                <option value="ARCHIVED">{productStatusLabels.ARCHIVED}</option>
               </Select>
             </label>
             <label>
@@ -467,11 +476,11 @@ export function AdminProductsPage() {
                     <div>
                       <h2 className="admin-product-row__title">{product.title}</h2>
                       <div className="admin-product-row__meta">
-                        <span>{product.slug}</span>
+                        <span>{`Ссылка: /product/${product.slug}`}</span>
                         <span>{product.category.name}</span>
                       </div>
                     </div>
-                    <Badge>{product.status}</Badge>
+                    <Badge>{productStatusLabels[product.status]}</Badge>
                   </div>
                   <Price amount={product.price} currency={product.currency} />
                   <p className="admin-product-row__description">

@@ -2,6 +2,13 @@ import Link from "next/link";
 import { Card, Price } from "@mattress/ui";
 import { getAdminAnalytics } from "@/shared/api/analytics";
 
+const orderStatusLabels: Record<string, string> = {
+  CANCELLED: "Отмененные",
+  COMPLETED: "Завершенные",
+  NEW: "Новые",
+  PROCESSING: "В обработке"
+};
+
 type AdminAnalyticsPageProps = {
   cookieHeader?: string;
 };
@@ -43,7 +50,7 @@ export async function AdminAnalyticsPage({ cookieHeader }: AdminAnalyticsPagePro
           <h2 className="admin-analytics-card__title">Заказы</h2>
           {analytics.ordersByStatus.map((item) => (
             <div className="admin-analytics-row" key={item.status}>
-              <span>{item.status}</span>
+              <span>{orderStatusLabels[item.status] ?? item.status}</span>
               <strong>{item.count}</strong>
             </div>
           ))}
