@@ -52,6 +52,7 @@ export function CatalogControls({
         aria-label="Сортировка товаров"
         onChange={(event) => handleSortChange(event.target.value)}
         value={sort}
+        variant="soft"
       >
         {sortOptions.map((option) => (
           <option key={option.value} value={option.value}>
