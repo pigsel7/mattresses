@@ -10,6 +10,7 @@ build
 .next
 **/.next
 coverage
+apps/backend/uploads
 **/tsconfig.tsbuildinfo
 npm-debug.log*
 yarn-debug.log*

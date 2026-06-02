@@ -1,6 +1,6 @@
 "use client";
 
-import type { FormEvent } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Button, Card, Input, Price, Select, Textarea, Badge } from "@mattress/ui";
@@ -13,6 +13,7 @@ import {
   getAdminProducts,
   updateAdminProduct
 } from "@/shared/api/admin-products";
+import { uploadAdminImage } from "@/shared/api/admin-files";
 
 type ProductFormState = {
   categoryId: string;
@@ -49,6 +50,7 @@ export function AdminProductsPage() {
   const [form, setForm] = useState<ProductFormState>(initialFormState);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadingField, setUploadingField] = useState<"gallery" | "main" | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -231,6 +233,43 @@ export function AdminProductsPage() {
     }
   }
 
+  async function handleImageUpload(
+    event: ChangeEvent<HTMLInputElement>,
+    target: "gallery" | "main"
+  ) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    setError(null);
+    setUploadingField(target);
+
+    try {
+      const uploadedImage = await uploadAdminImage(file);
+
+      if (target === "main") {
+        setForm((current) => ({
+          ...current,
+          mainImageUrl: uploadedImage.url
+        }));
+      } else {
+        setForm((current) => ({
+          ...current,
+          galleryImageUrls: [current.galleryImageUrls.trim(), uploadedImage.url]
+            .filter(Boolean)
+            .join("\n")
+        }));
+      }
+    } catch {
+      setError("Не удалось загрузить изображение.");
+    } finally {
+      setUploadingField(null);
+    }
+  }
+
   return (
     <div className="page-stack admin-products-page">
       <div className="admin-products-page__top">
@@ -355,12 +394,43 @@ export function AdminProductsPage() {
               />
             </label>
             <label>
+              <span>Загрузить основное фото</span>
+              <Input
+                accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                disabled={Boolean(uploadingField)}
+                fullWidth
+                onChange={(event) => void handleImageUpload(event, "main")}
+                type="file"
+              />
+              {uploadingField === "main" ? (
+                <span className="admin-products-form__hint">Загрузка фото</span>
+              ) : null}
+            </label>
+            {form.mainImageUrl ? (
+              <div className="admin-products-form__preview">
+                <img alt="Основное фото товара" src={form.mainImageUrl} />
+              </div>
+            ) : null}
+            <label>
               <span>Галерея, по одному URL в строке</span>
               <Textarea
                 fullWidth
                 onChange={(event) => setForm({ ...form, galleryImageUrls: event.target.value })}
                 value={form.galleryImageUrls}
               />
+            </label>
+            <label>
+              <span>Добавить фото в галерею</span>
+              <Input
+                accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                disabled={Boolean(uploadingField)}
+                fullWidth
+                onChange={(event) => void handleImageUpload(event, "gallery")}
+                type="file"
+              />
+              {uploadingField === "gallery" ? (
+                <span className="admin-products-form__hint">Загрузка фото</span>
+              ) : null}
             </label>
             <label>
               <span>Описание</span>

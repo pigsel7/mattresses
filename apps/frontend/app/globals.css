@@ -1153,6 +1153,28 @@ a {
   gap: 10px;
 }
 
+.admin-products-form__hint {
+  color: #0077cc;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-products-form__preview {
+  width: 120px;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  background: #f1f3f5;
+}
+
+.admin-products-form__preview img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
 .admin-product-row {
   display: grid;
   grid-template-columns: 108px minmax(0, 1fr);

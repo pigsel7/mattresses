@@ -32,6 +32,7 @@ services:
       SHOP_CONTACT_PHONE: "${SHOP_CONTACT_PHONE:-+7 000 000-00-00}"
       SHOP_ADDRESS: "${SHOP_ADDRESS:-г. Симферополь}"
       SHOP_OWNER_EMAIL: ${SHOP_OWNER_EMAIL:-owner@example.com}
+      PUBLIC_API_URL: http://localhost:${BACKEND_PORT:-4000}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_SECURE: ${SMTP_SECURE:-false}
@@ -41,6 +42,8 @@ services:
       PORT: 4000
     ports:
       - "${BACKEND_PORT:-4000}:4000"
+    volumes:
+      - backend-uploads:/app/apps/backend/uploads
 
   frontend:
     build:
@@ -59,3 +62,4 @@ services:
 
 volumes:
   postgres-data:
+  backend-uploads:
