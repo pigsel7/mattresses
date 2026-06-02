@@ -31,6 +31,9 @@ export function Header({
             </Link>
             {hasContacts ? (
               <div className="site-header__contacts" aria-label="Контакты магазина">
+                {address ? (
+                  <span className="site-header__address">{address}</span>
+                ) : null}
                 {contactPhone ? (
                   phoneHref ? (
                     <a className="site-header__phone" href={phoneHref}>
@@ -39,9 +42,6 @@ export function Header({
                   ) : (
                     <span className="site-header__phone">{contactPhone}</span>
                   )
-                ) : null}
-                {address ? (
-                  <span className="site-header__address">{address}</span>
                 ) : null}
               </div>
             ) : null}
