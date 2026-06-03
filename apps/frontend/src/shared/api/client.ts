@@ -1,8 +1,11 @@
+const serverApiBaseUrl = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
+const browserApiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+
 export const apiBaseUrl = (
-  process.env.API_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:4000"
-).replace(/\/$/, "");
+  typeof window === "undefined"
+    ? serverApiBaseUrl
+    : browserApiBaseUrl
+)?.replace(/\/$/, "") ?? "http://localhost:4000";
 
 export async function apiClient<TResponse>(
   path: string,

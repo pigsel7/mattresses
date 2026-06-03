@@ -1,7 +1,7 @@
 "use client";
 
 import type { ChangeEvent, DragEvent, FormEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Button, Card, Input, Price, Select, Textarea, Badge } from "@mattress/ui";
 import type { CategoryDto } from "@mattress/shared";
@@ -52,6 +52,7 @@ const productStatusLabels: Record<ProductFormState["status"], string> = {
 
 export function AdminProductsPage() {
   const toast = useToast();
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [products, setProducts] = useState<AdminProductDto[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
@@ -484,18 +485,22 @@ export function AdminProductsPage() {
                 onDragOver={(event) => event.preventDefault()}
                 onDrop={handleImageDrop}
               >
-                <Input
+                <input
                   accept="image/jpeg,image/png,image/webp,image/svg+xml"
                   className="admin-products-images__input"
                   disabled={isUploadingImages}
-                  id="admin-product-images"
                   multiple
                   onChange={handleImageInputChange}
+                  ref={imageInputRef}
                   type="file"
                 />
-                <label className="admin-products-images__picker" htmlFor="admin-product-images">
+                <Button
+                  disabled={isUploadingImages}
+                  onClick={() => imageInputRef.current?.click()}
+                  type="button"
+                >
                   {isUploadingImages ? "Загружаем фотографии" : "Выбрать фотографии"}
-                </label>
+                </Button>
                 <span className="admin-products-images__drop-text">
                   или перетащите файлы сюда
                 </span>
