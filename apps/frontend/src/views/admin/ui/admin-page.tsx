@@ -12,6 +12,34 @@ const roleLabels: Record<string, string> = {
   SUPER_ADMIN: "Главный администратор"
 };
 
+const adminSections = [
+  {
+    className: "admin-dashboard__card--products",
+    href: "/admin/products",
+    title: "Товары"
+  },
+  {
+    className: "admin-dashboard__card--categories",
+    href: "/admin/categories",
+    title: "Категории"
+  },
+  {
+    className: "admin-dashboard__card--orders",
+    href: "/admin/orders",
+    title: "Заказы"
+  },
+  {
+    className: "admin-dashboard__card--settings",
+    href: "/admin/settings",
+    title: "Настройки"
+  },
+  {
+    className: "admin-dashboard__card--analytics",
+    href: "/admin/analytics",
+    title: "Аналитика"
+  }
+];
+
 export function AdminPage({ admin }: AdminPageProps) {
   const lastLoginAt = admin.lastLoginAt
     ? new Date(admin.lastLoginAt).toLocaleString("ru-RU")
@@ -54,41 +82,16 @@ export function AdminPage({ admin }: AdminPageProps) {
       </Card>
 
       <div className="admin-dashboard__cards">
-        <Card className="admin-dashboard__card">
-          <div className="admin-dashboard__label">Товары</div>
-          <div className="admin-dashboard__value">Список, создание, редактирование, фото</div>
-          <Link className="admin-dashboard__link" href="/admin/products">
-            Открыть управление товарами
+        {adminSections.map((section) => (
+          <Link
+            className={`admin-dashboard__card ${section.className}`}
+            href={section.href}
+            key={section.href}
+          >
+            <span aria-hidden="true" className="admin-dashboard__card-icon" />
+            <span className="admin-dashboard__card-title">{section.title}</span>
           </Link>
-        </Card>
-        <Card className="admin-dashboard__card">
-          <div className="admin-dashboard__label">Категории</div>
-          <div className="admin-dashboard__value">Управление деревом категорий</div>
-          <Link className="admin-dashboard__link" href="/admin/categories">
-            Открыть управление категориями
-          </Link>
-        </Card>
-        <Card className="admin-dashboard__card">
-          <div className="admin-dashboard__label">Заказы</div>
-          <div className="admin-dashboard__value">Просмотр и смена статусов</div>
-          <Link className="admin-dashboard__link" href="/admin/orders">
-            Открыть заказы
-          </Link>
-        </Card>
-        <Card className="admin-dashboard__card">
-          <div className="admin-dashboard__label">Настройки</div>
-          <div className="admin-dashboard__value">Телефон и email владельца</div>
-          <Link className="admin-dashboard__link" href="/admin/settings">
-            Открыть настройки магазина
-          </Link>
-        </Card>
-        <Card className="admin-dashboard__card">
-          <div className="admin-dashboard__label">Аналитика</div>
-          <div className="admin-dashboard__value">Посещения, заказы и популярные товары</div>
-          <Link className="admin-dashboard__link" href="/admin/analytics">
-            Открыть аналитику
-          </Link>
-        </Card>
+        ))}
       </div>
     </section>
   );

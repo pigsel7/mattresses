@@ -3,7 +3,7 @@
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Badge, Button, Card, Checkbox, Input } from "@mattress/ui";
+import { Badge, Button, Card, Checkbox, Input, Toast } from "@mattress/ui";
 import type { AdminSettingDto } from "@mattress/shared";
 import { getAdminSettings, updateAdminSetting } from "@/shared/api/admin-settings";
 
@@ -13,11 +13,21 @@ type SettingDraft = {
   value: string;
 };
 
+const settingTitles: Record<string, string> = {
+  contact_phone: "Контактный телефон",
+  owner_email: "Email для получения заказов",
+  shop_address: "Город и адрес магазина"
+};
+
 export function AdminSettingsPage() {
   const [settings, setSettings] = useState<AdminSettingDto[]>([]);
   const [drafts, setDrafts] = useState<Record<string, SettingDraft>>({});
   const [error, setError] = useState<string | null>(null);
   const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    variant: "error" | "info" | "success";
+  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,6 +67,16 @@ export function AdminSettingsPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!toast) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => setToast(null), 3500);
+
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
   function updateDraft(key: string, patch: Partial<SettingDraft>) {
     setDrafts((current) => ({
       ...current,
@@ -91,8 +111,14 @@ export function AdminSettingsPage() {
       setSettings((current) =>
         current.map((setting) => (setting.key === key ? updated : setting))
       );
+      setToast({
+        message: `${settingTitles[key] ?? "Настройка"} сохранена`,
+        variant: "success"
+      });
     } catch {
-      setError(`Не удалось сохранить настройку ${key}.`);
+      const message = `Не удалось сохранить настройку: ${settingTitles[key] ?? key}.`;
+      setError(message);
+      setToast({ message, variant: "error" });
     } finally {
       setSavingKey(null);
     }
@@ -112,6 +138,7 @@ export function AdminSettingsPage() {
         </Link>
       </div>
 
+      {toast ? <Toast variant={toast.variant}>{toast.message}</Toast> : null}
       {error ? <div className="form-error">{error}</div> : null}
 
       <div className="admin-settings-page__list">
@@ -127,16 +154,18 @@ export function AdminSettingsPage() {
               <form className="admin-setting-row__body" onSubmit={(event) => void handleSave(setting.key, event)}>
                 <div className="admin-setting-row__top">
                   <div>
-                    <h2 className="admin-setting-row__title">{setting.key}</h2>
+                    <h2 className="admin-setting-row__title">
+                      {settingTitles[setting.key] ?? setting.label ?? setting.key}
+                    </h2>
                     <div className="admin-setting-row__meta">
-                      {setting.label ? <span>{setting.label}</span> : null}
+                      <span>{settingTitles[setting.key] ?? setting.label ?? setting.key}</span>
                     </div>
                   </div>
-                  <Badge>{setting.isPublic ? "public" : "private"}</Badge>
+                  <Badge>{setting.isPublic ? "Публично" : "Скрыто"}</Badge>
                 </div>
                 <div className="admin-setting-row__grid">
                   <label>
-                    <span>Заголовок</span>
+                    <span>Название в админке</span>
                     <Input
                       fullWidth
                       onChange={(event) => updateDraft(setting.key, { label: event.target.value })}

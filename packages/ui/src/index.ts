@@ -6,3 +6,4 @@ export { Input } from "./input";
 export { Price } from "./price";
 export { Select } from "./select";
 export { Textarea } from "./textarea";
+export { Toast } from "./toast";
