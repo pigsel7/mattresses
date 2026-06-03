@@ -376,10 +376,10 @@ export function AdminProductsPage() {
   }
 
   function handleImageInputChange(event: ChangeEvent<HTMLInputElement>) {
-    const { files } = event.target;
+    const files = Array.from(event.currentTarget.files ?? []);
     event.target.value = "";
 
-    if (files) {
+    if (files.length > 0) {
       void uploadImageFiles(files);
     }
   }
