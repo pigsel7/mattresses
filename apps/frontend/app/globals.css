@@ -1364,6 +1364,11 @@ a {
   opacity: 0.72;
 }
 
+.admin-products-images__item--failed {
+  border-color: #ffc9c9;
+  background: #fff8f8;
+}
+
 .admin-products-images__item img {
   width: 100%;
   aspect-ratio: 1 / 1;

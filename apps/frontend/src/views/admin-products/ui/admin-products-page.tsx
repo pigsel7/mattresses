@@ -30,6 +30,13 @@ type ProductFormState = {
   title: string;
 };
 
+type LocalImagePreview = {
+  fileName: string;
+  id: string;
+  previewUrl: string;
+  status: "failed" | "uploading";
+};
+
 const initialFormState: ProductFormState = {
   categoryId: "",
   currency: "RUB",
@@ -50,9 +57,19 @@ const productStatusLabels: Record<ProductFormState["status"], string> = {
   DRAFT: "Черновик"
 };
 
+function createLocalPreviewId(file: File) {
+  const randomId =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2);
+
+  return `${file.name}-${file.size}-${file.lastModified}-${randomId}`;
+}
+
 export function AdminProductsPage() {
   const toast = useToast();
   const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const localImagePreviewsRef = useRef<LocalImagePreview[]>([]);
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [products, setProducts] = useState<AdminProductDto[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
@@ -60,7 +77,7 @@ export function AdminProductsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
-  const [pendingImagePreviews, setPendingImagePreviews] = useState<string[]>([]);
+  const [localImagePreviews, setLocalImagePreviews] = useState<LocalImagePreview[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -106,6 +123,17 @@ export function AdminProductsPage() {
   );
 
   useEffect(() => {
+    localImagePreviewsRef.current = localImagePreviews;
+  }, [localImagePreviews]);
+
+  useEffect(
+    () => () => {
+      localImagePreviewsRef.current.forEach((preview) => URL.revokeObjectURL(preview.previewUrl));
+    },
+    []
+  );
+
+  useEffect(() => {
     if (!selectedProduct) {
       return;
     }
@@ -136,8 +164,16 @@ export function AdminProductsPage() {
     setProducts(loadedProducts);
   }
 
+  function clearLocalImagePreviews() {
+    setLocalImagePreviews((current) => {
+      current.forEach((preview) => URL.revokeObjectURL(preview.previewUrl));
+      return [];
+    });
+  }
+
   function resetForm() {
     setSelectedProductId(null);
+    clearLocalImagePreviews();
     setForm((current) => ({
       ...initialFormState,
       categoryId: current.categoryId || categories[0]?.id || ""
@@ -292,12 +328,28 @@ export function AdminProductsPage() {
 
     setError(null);
     setIsUploadingImages(true);
-    const previewUrls = selectedFiles.map((file) => URL.createObjectURL(file));
-    setPendingImagePreviews((current) => [...current, ...previewUrls]);
+    const previews = selectedFiles.map((file) => ({
+      fileName: file.name,
+      id: createLocalPreviewId(file),
+      previewUrl: URL.createObjectURL(file),
+      status: "uploading" as const
+    }));
+    setLocalImagePreviews((current) => [...current, ...previews]);
 
     try {
       const uploadedImages = await Promise.all(selectedFiles.map(uploadAdminImage));
       updateImageUrls([...getImageUrls(), ...uploadedImages.map((image) => image.url)]);
+      setLocalImagePreviews((current) =>
+        current.filter((preview) => {
+          const shouldRemove = previews.some((uploadedPreview) => uploadedPreview.id === preview.id);
+
+          if (shouldRemove) {
+            URL.revokeObjectURL(preview.previewUrl);
+          }
+
+          return !shouldRemove;
+        })
+      );
       toast.success(
         uploadedImages.length === 1
           ? "Фотография загружена"
@@ -310,12 +362,15 @@ export function AdminProductsPage() {
         "Проверьте формат файлов и попробуйте еще раз."
       ];
       setError(errorMessage);
+      setLocalImagePreviews((current) =>
+        current.map((preview) =>
+          previews.some((failedPreview) => failedPreview.id === preview.id)
+            ? { ...preview, status: "failed" }
+            : preview
+        )
+      );
       toast.error(message);
     } finally {
-      setPendingImagePreviews((current) =>
-        current.filter((previewUrl) => !previewUrls.includes(previewUrl))
-      );
-      previewUrls.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
       setIsUploadingImages(false);
     }
   }
@@ -342,17 +397,35 @@ export function AdminProductsPage() {
     updateImageUrls([url, ...getImageUrls().filter((imageUrl) => imageUrl !== url)]);
   }
 
+  function removeLocalImagePreview(id: string) {
+    setLocalImagePreviews((current) =>
+      current.filter((preview) => {
+        const shouldRemove = preview.id === id;
+
+        if (shouldRemove) {
+          URL.revokeObjectURL(preview.previewUrl);
+        }
+
+        return !shouldRemove;
+      })
+    );
+  }
+
   const imageUrls = getImageUrls();
   const imagePreviewItems = [
     ...imageUrls.map((url, index) => ({
       index,
       isUploading: false,
+      localId: null,
+      status: "uploaded" as const,
       url
     })),
-    ...pendingImagePreviews.map((url, index) => ({
+    ...localImagePreviews.map((preview, index) => ({
       index: imageUrls.length + index,
-      isUploading: true,
-      url
+      isUploading: preview.status === "uploading",
+      localId: preview.id,
+      status: preview.status,
+      url: preview.previewUrl
     }))
   ];
 
@@ -507,10 +580,12 @@ export function AdminProductsPage() {
               </div>
               {imagePreviewItems.length > 0 ? (
                 <div className="admin-products-images__grid">
-                  {imagePreviewItems.map(({ index, isUploading, url }) => (
+                  {imagePreviewItems.map(({ index, isUploading, localId, status, url }) => (
                     <div
                       className={
-                        isUploading
+                        status === "failed"
+                          ? "admin-products-images__item admin-products-images__item--failed"
+                          : isUploading
                           ? "admin-products-images__item admin-products-images__item--pending"
                           : "admin-products-images__item"
                       }
@@ -518,8 +593,16 @@ export function AdminProductsPage() {
                     >
                       <img alt={`Фото товара ${index + 1}`} src={url} />
                       <div className="admin-products-images__item-actions">
-                        <Badge>{isUploading ? "Загрузка" : index === 0 ? "Основное" : "Галерея"}</Badge>
-                        {!isUploading && index > 0 ? (
+                        <Badge>
+                          {status === "failed"
+                            ? "Ошибка загрузки"
+                            : isUploading
+                              ? "Загрузка"
+                              : index === 0
+                                ? "Основное"
+                                : "Галерея"}
+                        </Badge>
+                        {status === "uploaded" && index > 0 ? (
                           <Button
                             onClick={() => makeMainImage(url)}
                             size="sm"
@@ -529,7 +612,7 @@ export function AdminProductsPage() {
                             Сделать основным
                           </Button>
                         ) : null}
-                        {!isUploading ? (
+                        {status === "uploaded" ? (
                           <Button
                             onClick={() => removeImage(url)}
                             size="sm"
@@ -537,6 +620,16 @@ export function AdminProductsPage() {
                             variant="ghost"
                           >
                             Удалить
+                          </Button>
+                        ) : null}
+                        {localId ? (
+                          <Button
+                            onClick={() => removeLocalImagePreview(localId)}
+                            size="sm"
+                            type="button"
+                            variant="ghost"
+                          >
+                            Убрать превью
                           </Button>
                         ) : null}
                       </div>
