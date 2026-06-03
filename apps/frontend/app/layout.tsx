@@ -5,6 +5,7 @@ import { PageViewTracker } from "@/features/analytics/track-page-view";
 import { Header } from "@/widgets/header";
 import { getAdminSession, getCustomerSession } from "@/shared/api/auth";
 import { getPublicSettings } from "@/shared/api/catalog";
+import { ToastProvider } from "@/shared/ui/toast-provider";
 
 export const metadata: Metadata = {
   title: "Sleep Shop",
@@ -46,14 +47,16 @@ export default async function RootLayout({
   return (
     <html lang="ru">
       <body>
-        <Header
-          address={contacts.address ?? "г. Симферополь"}
-          contactPhone={contacts.contactPhone}
-          isSignedIn={Boolean(user)}
-          showAdminLink={Boolean(admin)}
-        />
-        <PageViewTracker />
-        <main className="page-shell">{children}</main>
+        <ToastProvider>
+          <Header
+            address={contacts.address ?? "г. Симферополь"}
+            contactPhone={contacts.contactPhone}
+            isSignedIn={Boolean(user)}
+            showAdminLink={Boolean(admin)}
+          />
+          <PageViewTracker />
+          <main className="page-shell">{children}</main>
+        </ToastProvider>
       </body>
     </html>
   );

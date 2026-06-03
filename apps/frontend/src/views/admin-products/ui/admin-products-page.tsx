@@ -14,6 +14,7 @@ import {
   updateAdminProduct
 } from "@/shared/api/admin-products";
 import { uploadAdminImage } from "@/shared/api/admin-files";
+import { useToast } from "@/shared/ui/toast-provider";
 
 type ProductFormState = {
   categoryId: string;
@@ -50,6 +51,7 @@ const productStatusLabels: Record<ProductFormState["status"], string> = {
 };
 
 export function AdminProductsPage() {
+  const toast = useToast();
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [products, setProducts] = useState<AdminProductDto[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
@@ -57,6 +59,7 @@ export function AdminProductsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [pendingImagePreviews, setPendingImagePreviews] = useState<string[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -84,6 +87,7 @@ export function AdminProductsPage() {
       } catch {
         if (!cancelled) {
           setError("Не удалось загрузить админские данные.");
+          toast.error("Не удалось загрузить админские данные.");
         }
       }
     }
@@ -93,7 +97,7 @@ export function AdminProductsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [toast]);
 
   const selectedProduct = useMemo(
     () => products.find((product) => product.id === selectedProductId) ?? null,
@@ -177,8 +181,17 @@ export function AdminProductsPage() {
     event.preventDefault();
     setError(null);
 
+    if (isUploadingImages) {
+      const message = "Дождитесь загрузки фотографий перед сохранением товара.";
+      setError(message);
+      toast.info(message);
+      return;
+    }
+
     if (!form.categoryId) {
-      setError("Выберите категорию.");
+      const message = "Выберите категорию.";
+      setError(message);
+      toast.error(message);
       return;
     }
 
@@ -196,7 +209,9 @@ export function AdminProductsPage() {
     };
 
     if (!payload.title || !payload.slug || Number.isNaN(payload.price) || Number.isNaN(payload.stockQuantity)) {
-      setError("Проверьте обязательные поля.");
+      const message = "Проверьте обязательные поля.";
+      setError(message);
+      toast.error(message);
       return;
     }
 
@@ -211,8 +226,11 @@ export function AdminProductsPage() {
 
       await refreshProducts();
       resetForm();
+      toast.success(selectedProductId ? "Товар сохранен" : "Товар создан");
     } catch {
-      setError("Не удалось сохранить товар.");
+      const message = "Не удалось сохранить товар.";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -234,8 +252,11 @@ export function AdminProductsPage() {
       if (selectedProductId === id) {
         resetForm();
       }
+      toast.success("Товар удален");
     } catch {
-      setError("Не удалось удалить товар.");
+      const message = "Не удалось удалить товар.";
+      setError(message);
+      toast.error(message);
     }
   }
 
@@ -263,15 +284,37 @@ export function AdminProductsPage() {
       return;
     }
 
+    if (isUploadingImages) {
+      toast.info("Дождитесь завершения текущей загрузки фотографий.");
+      return;
+    }
+
     setError(null);
     setIsUploadingImages(true);
+    const previewUrls = selectedFiles.map((file) => URL.createObjectURL(file));
+    setPendingImagePreviews((current) => [...current, ...previewUrls]);
 
     try {
       const uploadedImages = await Promise.all(selectedFiles.map(uploadAdminImage));
       updateImageUrls([...getImageUrls(), ...uploadedImages.map((image) => image.url)]);
+      toast.success(
+        uploadedImages.length === 1
+          ? "Фотография загружена"
+          : `Фотографии загружены: ${uploadedImages.length}`
+      );
     } catch {
-      setError("Не удалось загрузить изображения.");
+      const errorMessage = "Не удалось загрузить изображения.";
+      const message = [
+        errorMessage,
+        "Проверьте формат файлов и попробуйте еще раз."
+      ];
+      setError(errorMessage);
+      toast.error(message);
     } finally {
+      setPendingImagePreviews((current) =>
+        current.filter((previewUrl) => !previewUrls.includes(previewUrl))
+      );
+      previewUrls.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
       setIsUploadingImages(false);
     }
   }
@@ -299,6 +342,18 @@ export function AdminProductsPage() {
   }
 
   const imageUrls = getImageUrls();
+  const imagePreviewItems = [
+    ...imageUrls.map((url, index) => ({
+      index,
+      isUploading: false,
+      url
+    })),
+    ...pendingImagePreviews.map((url, index) => ({
+      index: imageUrls.length + index,
+      isUploading: true,
+      url
+    }))
+  ];
 
   return (
     <div className="page-stack admin-products-page">
@@ -445,14 +500,21 @@ export function AdminProductsPage() {
                   или перетащите файлы сюда
                 </span>
               </div>
-              {imageUrls.length > 0 ? (
+              {imagePreviewItems.length > 0 ? (
                 <div className="admin-products-images__grid">
-                  {imageUrls.map((url, index) => (
-                    <div className="admin-products-images__item" key={url}>
+                  {imagePreviewItems.map(({ index, isUploading, url }) => (
+                    <div
+                      className={
+                        isUploading
+                          ? "admin-products-images__item admin-products-images__item--pending"
+                          : "admin-products-images__item"
+                      }
+                      key={url}
+                    >
                       <img alt={`Фото товара ${index + 1}`} src={url} />
                       <div className="admin-products-images__item-actions">
-                        <Badge>{index === 0 ? "Основное" : "Галерея"}</Badge>
-                        {index > 0 ? (
+                        <Badge>{isUploading ? "Загрузка" : index === 0 ? "Основное" : "Галерея"}</Badge>
+                        {!isUploading && index > 0 ? (
                           <Button
                             onClick={() => makeMainImage(url)}
                             size="sm"
@@ -462,14 +524,16 @@ export function AdminProductsPage() {
                             Сделать основным
                           </Button>
                         ) : null}
-                        <Button
-                          onClick={() => removeImage(url)}
-                          size="sm"
-                          type="button"
-                          variant="ghost"
-                        >
-                          Удалить
-                        </Button>
+                        {!isUploading ? (
+                          <Button
+                            onClick={() => removeImage(url)}
+                            size="sm"
+                            type="button"
+                            variant="ghost"
+                          >
+                            Удалить
+                          </Button>
+                        ) : null}
                       </div>
                     </div>
                   ))}
@@ -490,7 +554,7 @@ export function AdminProductsPage() {
                   Отмена
                 </Button>
               ) : null}
-              <Button loading={isLoading} type="submit">
+              <Button disabled={isUploadingImages} loading={isLoading} type="submit">
                 {selectedProductId ? "Сохранить" : "Создать"}
               </Button>
             </div>

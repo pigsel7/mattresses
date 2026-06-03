@@ -3,9 +3,10 @@
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Badge, Button, Card, Checkbox, Input, Toast } from "@mattress/ui";
+import { Badge, Button, Card, Checkbox, Input } from "@mattress/ui";
 import type { AdminSettingDto } from "@mattress/shared";
 import { getAdminSettings, updateAdminSetting } from "@/shared/api/admin-settings";
+import { useToast } from "@/shared/ui/toast-provider";
 
 type SettingDraft = {
   isPublic: boolean;
@@ -20,14 +21,11 @@ const settingTitles: Record<string, string> = {
 };
 
 export function AdminSettingsPage() {
+  const toast = useToast();
   const [settings, setSettings] = useState<AdminSettingDto[]>([]);
   const [drafts, setDrafts] = useState<Record<string, SettingDraft>>({});
   const [error, setError] = useState<string | null>(null);
   const [savingKey, setSavingKey] = useState<string | null>(null);
-  const [toast, setToast] = useState<{
-    message: string;
-    variant: "error" | "info" | "success";
-  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,6 +54,7 @@ export function AdminSettingsPage() {
       } catch {
         if (!cancelled) {
           setError("Не удалось загрузить настройки.");
+          toast.error("Не удалось загрузить настройки.");
         }
       }
     }
@@ -65,16 +64,6 @@ export function AdminSettingsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  useEffect(() => {
-    if (!toast) {
-      return;
-    }
-
-    const timer = window.setTimeout(() => setToast(null), 3500);
-
-    return () => window.clearTimeout(timer);
   }, [toast]);
 
   function updateDraft(key: string, patch: Partial<SettingDraft>) {
@@ -111,14 +100,11 @@ export function AdminSettingsPage() {
       setSettings((current) =>
         current.map((setting) => (setting.key === key ? updated : setting))
       );
-      setToast({
-        message: `${settingTitles[key] ?? "Настройка"} сохранена`,
-        variant: "success"
-      });
+      toast.success(`${settingTitles[key] ?? "Настройка"} сохранена`);
     } catch {
       const message = `Не удалось сохранить настройку: ${settingTitles[key] ?? key}.`;
       setError(message);
-      setToast({ message, variant: "error" });
+      toast.error(message);
     } finally {
       setSavingKey(null);
     }
@@ -138,7 +124,6 @@ export function AdminSettingsPage() {
         </Link>
       </div>
 
-      {toast ? <Toast variant={toast.variant}>{toast.message}</Toast> : null}
       {error ? <div className="form-error">{error}</div> : null}
 
       <div className="admin-settings-page__list">
@@ -157,9 +142,6 @@ export function AdminSettingsPage() {
                     <h2 className="admin-setting-row__title">
                       {settingTitles[setting.key] ?? setting.label ?? setting.key}
                     </h2>
-                    <div className="admin-setting-row__meta">
-                      <span>{settingTitles[setting.key] ?? setting.label ?? setting.key}</span>
-                    </div>
                   </div>
                   <Badge>{setting.isPublic ? "Публично" : "Скрыто"}</Badge>
                 </div>

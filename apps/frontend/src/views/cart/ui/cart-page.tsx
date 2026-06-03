@@ -6,6 +6,7 @@ import type { Product } from "@/entities/product";
 import { useCart } from "@/features/cart/model";
 import { getProducts } from "@/shared/api/catalog";
 import { createOrder } from "@/shared/api/orders";
+import { useToast } from "@/shared/ui/toast-provider";
 import { Button, Card, Input, Price, Textarea } from "@mattress/ui";
 
 type CheckoutForm = {
@@ -25,6 +26,7 @@ const initialForm: CheckoutForm = {
 };
 
 export function CartPage() {
+  const toast = useToast();
   const { clear, items, removeItem, removeItems, updateItem } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -114,7 +116,9 @@ export function CartPage() {
     setCreatedOrderNumber(null);
 
     if (lines.length === 0) {
-      setSubmitError("Корзина пуста.");
+      const message = "Корзина пуста.";
+      setSubmitError(message);
+      toast.info(message);
       return;
     }
 
@@ -136,8 +140,14 @@ export function CartPage() {
       clear();
       setForm(initialForm);
       setCreatedOrderNumber(order.orderNumber);
+      toast.success([
+        `Заказ ${order.orderNumber} создан.`,
+        "Владелец магазина получил письмо и свяжется с вами по телефону."
+      ]);
     } catch {
-      setSubmitError("Не удалось оформить заказ. Проверьте данные и попробуйте еще раз.");
+      const message = "Не удалось оформить заказ. Проверьте данные и попробуйте еще раз.";
+      setSubmitError(message);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
